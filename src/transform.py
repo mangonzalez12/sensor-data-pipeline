@@ -30,28 +30,17 @@ def clean_dataframe(df):
     #Drop columns
     drop_columns = ["id", "Sensor_ID", "Timestamp", "Last_Maintenance_Date", "Equipment_ID", "X", "Y", "Z", "Fault_Status"]
     df_clean = df.drop(columns=drop_columns)
+
+    # Fill nan values as Functional for failure_Type
+    df_clean["Failure_Type"] = df_clean["Failure_Type"].fillna("Functional")
     
     
     return df_clean
 
 
-#--------------------------------------------
-#3 Create summary dataframe for visualization
-#--------------------------------------------
-def create_summary(df):
-    numeric_cols = df.select_dtypes(include=[np.number])
-    summary = pd.DataFrame({
-        "min": numeric_cols.min(),
-        "max": numeric_cols.max(),
-        "mean": numeric_cols.mean(),
-        "std": numeric_cols.std()
-    })
-    print("summary type:", type(summary))
-    
-    return summary
 
 #----------------------------------------
-#4 Transform data and produce scaled data
+#3 Transform data and produce scaled data
 #----------------------------------------
 
 def transform_dataframe(df):
@@ -66,6 +55,8 @@ def transform_dataframe(df):
     df = df.drop(columns=drop_columns)
     
     df = df.copy()
+    # Fill nan values as Functional for failure_Type
+    df["Failure_Type"] = df["Failure_Type"].fillna("Functional")
 
     #Convert categorical columns
     categorical_cols=["Operational_Status", "Failure_Type",

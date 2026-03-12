@@ -18,7 +18,25 @@ def load_data(engine):
     return df
 
 #--------------------------------------------
-#2 Create summary dataframe for visualization
+#2 Drop non useful variables
+#--------------------------------------------
+
+def clean_dataframe(df):
+    """
+    Dataframe for summary with no scaling of numeric variables
+    Keeps categorical variables untouched.
+    """
+
+    #Drop columns
+    drop_columns = ["id", "Sensor_ID", "Timestamp", "Last_Maintenance_Date", "Equipment_ID", "X", "Y", "Z", "Fault_Status"]
+    df_clean = df.drop(columns=drop_columns)
+    
+    
+    return df_clean
+
+
+#--------------------------------------------
+#3 Create summary dataframe for visualization
 #--------------------------------------------
 def create_summary(df):
     numeric_cols = df.select_dtypes(include=[np.number])
@@ -28,32 +46,31 @@ def create_summary(df):
         "mean": numeric_cols.mean(),
         "std": numeric_cols.std()
     })
-
+    print("summary type:", type(summary))
+    
     return summary
 
 #----------------------------------------
-#3 Transform data and produce scaled data
+#4 Transform data and produce scaled data
 #----------------------------------------
 
 def transform_dataframe(df):
     """
-    Scaled dataframe for Machine Learning and Analytics.
+    Scaled dataframe for machine learning and analytics.
     Keeps categorical variables untouched.
     Returns dataframe with numeric columns scaled.
     """
 
     #Drop columns
-    drop_columns = ["id", "Sensor_ID", "Timestamp", "Last_Maintenance_Date"]
-    df = df.copy()
-    df = df.drop(columns=drop_columns, errors="ignore")
+    drop_columns = ["id", "Sensor_ID", "Timestamp", "Last_Maintenance_Date", "Equipment_ID", "X", "Y", "Z", "Fault_Status"]
+    df = df.drop(columns=drop_columns)
     
-
+    df = df.copy()
 
     #Convert categorical columns
-    categorical_cols=["Equipment_ID", "Operational_Status", "Fault_Status",
-                      "Failure_Type", "Last_Maintenance_Date", "Maintenance_Type",
-                       "Failure_History", "Repair_Time", "Ambient_Humidity",
-                        "External_Factors", "X", "Y", "Z",
+    categorical_cols=["Operational_Status", "Failure_Type",
+                        "Maintenance_Type", "Failure_History", 
+                        "External_Factors",
                         "Equipment_Relationship", "Equipment_Criticality",
                         "Fault_Detected", "Predictive_Maintenance_Trigger"
     ]
@@ -73,12 +90,14 @@ def transform_dataframe(df):
     )
     
     #Merge categorical and scaled numeric columns 
-    df_sc = pd.concat(
+    ml_df = pd.concat(
         [df_scaled_numeric, df.drop(columns=numeric_cols)],
         axis=1
     )
+    print("ml_df type:", type(ml_df))
 
-    return df_sc
+
+    return ml_df
 
 #---------------------------------------------------------------
 #4 Mini transformation pipeline for Machine Learning and Analytics
@@ -86,8 +105,9 @@ def transform_dataframe(df):
 
 def get_clean_data(engine):
     df = load_data(engine)
-    clean_df = transform_dataframe(df)
-    return clean_df
+    ml_df = transform_dataframe(df)
+
+    return ml_df
 
 
 
